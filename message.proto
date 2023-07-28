@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package message;
+
+message HangmanRequest {
+    string guess = 1;
+}
+
+message HangmanResponse {
+    string word = 1;
+    int32 remaining_attempts = 2;
+    bool game_over = 3;
+}
+
+service Hangman {
+    rpc PlayHangman(stream HangmanRequest) returns (stream HangmanResponse);
+}

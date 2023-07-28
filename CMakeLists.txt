@@ -3,18 +3,10 @@ cmake_minimum_required(VERSION 3.15)
 
 # Project
 project(Hangman)
+
 # Set the MY_INSTALL_DIR variable to the desired directory path
 set(MY_INSTALL_DIR "$ENV{HOME}/.local")
-
-# Create the directory if it doesn't exist
-file(MAKE_DIRECTORY ${MY_INSTALL_DIR})
-
-# Add the local bin folder to the PATH environment variable
-# Note: This is only for the current build environment, not the system-wide PATH
-set(PATH_ENV "$ENV{PATH}")
-set(PATH_ENV "${MY_INSTALL_DIR}/bin:${PATH_ENV}" CACHE INTERNAL "Modified PATH environment variable")
-set(ENV{PATH} "${PATH_ENV}")
-
+list(APPEND CMAKE_PREFIX_PATH "${MY_INSTALL_DIR}")
 list(APPEND CMAKE_PREFIX_PATH "${MY_INSTALL_DIR}/include")
 
 option(protobuf_MODULE_COMPATIBLE TRUE)
@@ -24,6 +16,9 @@ find_package(gRPC CONFIG)
 
 if(gRPC_FOUND)
   message(STATUS "Using gRPC ${gRPC_VERSION}")
+  set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
+  set(_REFLECTION gRPC::grpc++_reflection)
+  set(_GRPC_GRPCPP gRPC::grpc++)
 else()
   message("gRPC NOT FOUND, Using FetchContent")
   include(FetchContent)
@@ -34,11 +29,11 @@ else()
   )
   set(FETCHCONTENT_QUIET OFF)
   FetchContent_MakeAvailable(grpc)
+  set(_PROTOBUF_LIBPROTOBUF libprotobuf)
+  set(_REFLECTION grpc++_reflection)
+  set(_GRPC_GRPCPP grpc++)
 endif()
 
-set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
-set(_REFLECTION gRPC::grpc++_reflection)
-set(_GRPC_GRPCPP gRPC::grpc++)
 
 if(CMAKE_CROSSCOMPILING)
   find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
